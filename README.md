@@ -1,4 +1,8 @@
-# hpc_lecture
+# MCS.T407 - High Performance Scientific Computing
+Spring 2020
+
+**Student ID:** 19M38277  
+**Name**: Felix Limanta
 
 |          | Topic                                | Sample code               |
 | -------- | ------------------------------------ | ------------------------- |
