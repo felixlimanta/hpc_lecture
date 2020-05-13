@@ -4,10 +4,11 @@
 
 template<class T>
 void merge(std::vector<T>& vec, int begin, int mid, int end) {
-  std::vector<T> tmp(end-begin+1);
+  std::vector<T> tmp(end - begin + 1);
   int left = begin;
-  int right = mid+1;
-  for (int i=0; i<tmp.size(); i++) { 
+  int right = mid + 1;
+
+  for (int i = 0; i < tmp.size(); i++) { 
     if (left > mid)
       tmp[i] = vec[right++];
     else if (right > end)
@@ -17,7 +18,8 @@ void merge(std::vector<T>& vec, int begin, int mid, int end) {
     else
       tmp[i] = vec[right++]; 
   }
-  for (int i=0; i<tmp.size(); i++) 
+
+  for (int i = 0; i < tmp.size(); i++) 
     vec[begin++] = tmp[i];
 }
 
@@ -25,8 +27,12 @@ template<class T>
 void merge_sort(std::vector<T>& vec, int begin, int end) {
   if(begin < end) {
     int mid = (begin + end) / 2;
+    
+    #pragma omp task shared(vec)
     merge_sort(vec, begin, mid);
-    merge_sort(vec, mid+1, end);
+    #pragma omp task shared(vec)
+    merge_sort(vec, mid + 1, end);
+    #pragma omp taskwait
     merge(vec, begin, mid, end);
   }
 }
@@ -40,9 +46,9 @@ int main() {
   }
   printf("\n");
 
-  merge_sort(vec, 0, n-1);
+  merge_sort(vec, 0, n - 1);
 
-  for (int i=0; i<n; i++) {
+  for (int i = 0; i < n; i++) {
     printf("%d ",vec[i]);
   }
   printf("\n");
