@@ -36,10 +36,17 @@ int main(int argc, char** argv) {
   MPI_Win win;
   MPI_Win_create(jbody, (N / size) * sizeof(Body), sizeof(Body), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
 
+  // jbody may be overwritten by MPI_Put before being sent
+  Body jbody_temp[N / size];
+
   for (int irank = 0; irank < size; irank++) {
+    for (int i = 0; i < N / size; i++) {
+        jbody_temp[i] = jbody[i];
+    }
+
     // Use window to send data
     MPI_Win_fence(0, win);
-    MPI_Put(jbody, N / size, MPI_BODY, send_to, 0, N / size, MPI_BODY, win);
+    MPI_Put(jbody_temp, N / size, MPI_BODY, send_to, 0, N / size, MPI_BODY, win);
     MPI_Win_fence(0, win);
 
     for (int i = 0; i < N / size; i++) {
