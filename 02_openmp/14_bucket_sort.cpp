@@ -13,23 +13,20 @@ int main() {
   }
   printf("\n");
 
-  std::vector<int> bucket(range); 
-  
-  #pragma omp parallel for
-  for (int i = 0; i < range; i++) {
-    bucket[i] = 0;
-  }
-  
-  #pragma omp parallel for shared(bucket)
-  for (int i = 0; i < n; i++) {
-    #pragma omp atomic update
+  std::vector<int> bucket(range,0); 
+#pragma omp parallel for
+  for (int i=0; i<n; i++)
+#pragma omp atomic update
     bucket[key[i]]++;
-  }
-
-  // Prefix sum to get boundaries
-  std::vector<int> cml_bucket(range);
-  for (int i = 0; i < range; i++) {
-    cml_bucket[i] = (i > 0 ? cml_bucket[i - 1] : 0) + bucket[i];
+  std::vector<int> offset(range,0);
+  for (int i=1; i<range; i++) 
+    offset[i] = offset[i-1] + bucket[i-1];
+#pragma omp parallel for
+  for (int i=0; i<range; i++) {
+    int j = offset[i];
+    for (; bucket[i]>0; bucket[i]--) {
+      key[j++] = i;
+    }
   }
 
   // Fill keys

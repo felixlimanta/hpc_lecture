@@ -27,12 +27,10 @@ template<class T>
 void merge_sort(std::vector<T>& vec, int begin, int end) {
   if(begin < end) {
     int mid = (begin + end) / 2;
-    
-    #pragma omp task shared(vec)
+#pragma omp task shared(vec)
     merge_sort(vec, begin, mid);
-    #pragma omp task shared(vec)
-    merge_sort(vec, mid + 1, end);
-    #pragma omp taskwait
+    merge_sort(vec, mid+1, end);
+#pragma omp taskwait
     merge(vec, begin, mid, end);
   }
 }
@@ -45,10 +43,12 @@ int main() {
     printf("%d ",vec[i]);
   }
   printf("\n");
-
-  merge_sort(vec, 0, n - 1);
-
-  for (int i = 0; i < n; i++) {
+#pragma omp parallel
+  {
+#pragma omp serial
+  merge_sort(vec, 0, n-1);
+  }
+  for (int i=0; i<n; i++) {
     printf("%d ",vec[i]);
   }
   printf("\n");
