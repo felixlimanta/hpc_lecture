@@ -24,8 +24,8 @@ int main() {
   for (int i = 0; i < g_timing_iterations + 2; i++) {
     if (i == 2) timer.start();
     cublasSgemm(g_cublas_handle,
-                (cublasOperation_t) cutlass::matrix_transform_t::NonTranspose,
-                (cublasOperation_t) cutlass::matrix_transform_t::NonTranspose,
+                CUBLAS_OP_N,
+                CUBLAS_OP_N,
                 m, n, k,
                 &alpha,
                 A.d_data(), m,
@@ -35,9 +35,9 @@ int main() {
   }
   timer.stop();
 
-  int64_t num_flops = (2 * int64_t(m) * int64_t(n) * int64_t(k)) + (2 * int64_t(m) * int64_t(n));
+  double num_flops = (2 * int64_t(m) * int64_t(n) * int64_t(k)) + (2 * int64_t(m) * int64_t(n));
   double tcublas = timer.elapsed_millis() / g_timing_iterations;
-  double cublas_flops = double(num_flops) / tcublas / 1.0e6;
+  double cublas_flops = num_flops / tcublas / 1.0e6;
 
   for (int i = 0; i < g_timing_iterations + 2; i++) {
     if (i == 2) timer.start();
@@ -51,7 +51,7 @@ int main() {
   timer.stop();
 
   double tcutlass = timer.elapsed_millis() / g_timing_iterations;
-  double cutlass_flops = double(num_flops) / tcutlass / 1.0e6;
+  double cutlass_flops = num_flops / tcutlass / 1.0e6;
   printf("CUBLAS: %.2f Gflops, CUTLASS: %.2f Gflops\n", cublas_flops, cutlass_flops);
   
   C.sync_host();
