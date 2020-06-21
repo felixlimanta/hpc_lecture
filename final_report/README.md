@@ -3,7 +3,6 @@
     - Outputs number of steps to convergence, elapsed time, and the sums of the absolute values of `u`, `v`, and `p` for quick sanity check.
     - Exports figure as `fig_python.png`.
 2. `02_navier_stokes.cpp`: Port of `01_navier_stokes.py` to C++.
-    - Slower than Python version, due to Numpy operations ported naively.
     - Results (`u`, `v`, `p`) are saved as `02_navier_stokes.out`.
     - `plot.py`: Plots Navier-Stokes calculation results
     - Exports figure as `fig_cpp.png` with `plot.py`.
@@ -19,7 +18,7 @@
     - Exports figure as `fig_openacc.png` with `plot.py`.
     - Noticeably worse due to suboptimal memory management, will debug later.
 
-Results on local machine, with Intel i5-7600, 8GB of RAM, and NVIDIA TITAN Xp, running Ubuntu 18.04
+Results on local machine, with Intel i5-7600, 8GB of RAM, and NVIDIA TITAN Xp, running Ubuntu 18.04; except for OpenACC on Tsubame.
 
 ```console
 foo@bar:~$ python 01_navier_stokes.py 
