@@ -88,7 +88,6 @@ if __name__ == "__main__":
     nx = 41
     ny = 41
     nit = 50
-    c = 1
     dx = 2 / (nx - 1)
     dy = 2 / (ny - 1)
     x = numpy.linspace(0, 2, nx)
