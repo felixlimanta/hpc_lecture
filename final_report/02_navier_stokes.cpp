@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const char* outf = "02_navier_stokes.out";
+
 typedef vector<vector<double>> matrix;
 
 void build_up_b(int nx, int ny, matrix &b, double rho, double dt, matrix &u,
@@ -63,8 +65,8 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
   matrix b(ny, vector<double>(nx));
 
   int nt = 0;
-  double du = 1000;
-  for (; du > eps; nt++) {
+  double u_diff = 1000;
+  for (; u_diff > eps; nt++) {
     for (int i = 0; i < ny; i++) {
       for (int j = 0; j < nx; j++) {
         un[i][j] = u[i][j];
@@ -114,15 +116,15 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
     }
 
     // diff on u to check for convergence
-    du = 0;
+    u_diff = 0;
     double u_sum = 0;
     for (int i = 0; i < ny; i++) {
       for (int j = 0; j < nx; j++) {
-        du += abs(u[i][j] - un[i][j]);
+        u_diff += abs(u[i][j] - un[i][j]);
         u_sum += abs(u[i][j]);
       }
     }
-    du /= u_sum;
+    u_diff /= u_sum;
   }
 
   return nt;
@@ -170,7 +172,7 @@ int main() {
   printf("Sum(|v|)=%f\n", v_sum);
   printf("Sum(|p|)=%f\n", p_sum);
 
-  ofstream f("02_navier_stokes.out");
+  ofstream f(outf);
   if (f.is_open()) {
     f << ny << " " << nx << "\n";
 

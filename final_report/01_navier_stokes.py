@@ -39,8 +39,8 @@ def cavity_flow(eps, u, v, dt, dx, dy, p, rho, nu):
     b = numpy.zeros((ny, nx))
 
     nt = 0
-    du = float('inf')
-    while du > eps:
+    u_diff = float('inf')
+    while u_diff > eps:
         un = u.copy()
         vn = v.copy()
 
@@ -79,7 +79,7 @@ def cavity_flow(eps, u, v, dt, dx, dy, p, rho, nu):
         v[:, -1] = 0
 
         # diff on u to check for convergence
-        du = numpy.sum(numpy.abs(u - un)) / numpy.sum(numpy.abs(u))
+        u_diff = numpy.sum(numpy.abs(u - un)) / numpy.sum(numpy.abs(u))
         nt += 1
 
     return u, v, p, nt

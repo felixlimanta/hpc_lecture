@@ -3,9 +3,17 @@
     - Outputs number of steps to convergence, elapsed time, and the sums of the absolute values of `u`, `v`, and `p` for quick sanity check.
     - Exports figure as `fig_python.png`.
 2. `02_navier_stokes.cpp`: Port of `01_navier_stokes.py` to C++.
+    - Slower than Python version, due to Numpy operations ported naively.
     - Results (`u`, `v`, `p`) are saved as `02_navier_stokes.out`.
     - `plot.py`: Plots Navier-Stokes calculation results
+    - Exports figure as `fig_cpp.png` with `plot.py`.
+3. `03_cuda.cpp`: CUDA version of `02_navier_stokes.cpp`.
+    - Drastic increase in speed.
+    - Some CUDA functions cannot accept `double` variable types, thus variables are defined as `float`s. This produces slight differences in output.
+    - Results (`u`, `v`, `p`) are saved as `03_cuda.out`.
+    - Exports figure as `fig_cuda.png` with `plot.py`.
 
+Results on local machine, with Intel i5-7600, 8GB of RAM, and NVIDIA TITAN Xp, running Ubuntu 18.04
 
 ```console
 foo@bar:~$ python 01_navier_stokes.py 
@@ -23,4 +31,13 @@ Sum(|u|)=219.635472
 Sum(|v|)=129.108059
 Sum(|p|)=175.680312
 Figure exported as fig_cpp.png
+
+foo@bar:~$ nvcc 03_cuda.cu && ./a.out && python plot.py 02_navier_stokes.out fig_cuda.png
+Steps: 6595
+Elapsed time: 3.871475 s.
+Sum(|u|)=219.635117
+Sum(|v|)=129.107422
+Sum(|p|)=175.680099
+Figure exported as fig_cuda.png
+
 ```
