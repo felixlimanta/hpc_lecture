@@ -16,6 +16,10 @@
     - Noticeable increase in speed, though not to CUDA's extent.
     - Results (`u`, `v`, `p`) are saved as `04_openmp.out`.
     - Exports figure as `fig_openmp.png` with `plot.py`.
+5. `05_openacc.cpp`: OpenACC version of `02_navier_stokes.cpp`, directly ported from `04_openmp.cpp`.
+    - Not tested yet, will test on Tsubame
+    - Results (`u`, `v`, `p`) are saved as `05_openacc.out`.
+    - Exports figure as `fig_openacc.png` with `plot.py`.
 
 Results on local machine, with Intel i5-7600, 8GB of RAM, and NVIDIA TITAN Xp, running Ubuntu 18.04
 
