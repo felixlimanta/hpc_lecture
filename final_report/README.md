@@ -14,10 +14,10 @@
 4. `04_openmp.cpp`: OpenMP parallelization of `02_navier_stokes.cpp`.
     - Results (`u`, `v`, `p`) are saved as `04_openmp.out`.
     - Exports figure as `fig_openmp.png` with `plot.py`.
-5. `05_openacc.cpp`: OpenACC version of `02_navier_stokes.cpp`, directly ported from `04_openmp.cpp`.
-    - Not tested yet, will test on Tsubame
+5. `05_openacc.cpp`: OpenACC version of `02_navier_stokes.cpp`.
     - Results (`u`, `v`, `p`) are saved as `05_openacc.out`.
     - Exports figure as `fig_openacc.png` with `plot.py`.
+    - Noticeably worse due to suboptimal memory management, will debug later.
 
 Results on local machine, with Intel i5-7600, 8GB of RAM, and NVIDIA TITAN Xp, running Ubuntu 18.04
 
@@ -53,4 +53,12 @@ Sum(|u|)=219.635472
 Sum(|v|)=129.108059
 Sum(|p|)=175.680312
 Figure exported as fig_openmp.png
+
+foo@bar:~$ pgc++ 05_openacc.cpp -acc -std=c++11 -ta=tesla:managed && ./a.out && python plot.py 05_openacc.out fig_openacc.png
+Steps: 6605
+Elapsed time: 22.729668 s.
+Sum(|u|)=219.635472
+Sum(|v|)=129.108059
+Sum(|p|)=175.680312
+Figure exported as fig_openacc.png
 ```

@@ -22,7 +22,7 @@ matrix init_matrix(int nx, int ny) {
 void build_up_b(int nx, int ny, matrix b, double rho, double dt, matrix u,
                 matrix v, double dx, double dy) {
 
-#pragma acc parallel loop
+#pragma acc parallel loop copyin(u[0:ny][0:nx], v[0:ny][0:nx]) copyout(b[0:ny][0:nx])
   for (int i = 1; i < ny - 1; i++) {
     for (int j = 1; j < nx - 1; j++) {
       b[i][j] = rho * (1 / dt *
@@ -41,6 +41,8 @@ void pressure_poisson(int nx, int ny, matrix p, double dx, double dy,
                       matrix b) {
 
   matrix pn = init_matrix(nx, ny);
+#pragma acc enter data create(pn[0:ny][0:nx])
+#pragma acc data copy(p[0:ny][0:nx]) copyin(b[0:ny][0:nx]) 
   for (int q = 0; q < nit; q++) {
 #pragma acc parallel loop
     for (int i = 0; i < ny; i++) {
@@ -71,6 +73,7 @@ void pressure_poisson(int nx, int ny, matrix p, double dx, double dy,
       p[ny - 1][i] = 0;  // p = 0 at y = 2
     }
   }
+#pragma acc exit data delete(pn)
 }
 
 int cavity_flow(double eps, int nx, int ny, matrix u, matrix v, double dt,
@@ -82,6 +85,8 @@ int cavity_flow(double eps, int nx, int ny, matrix u, matrix v, double dt,
 
   int nt = 0;
   double u_diff = 1000;
+#pragma acc enter data create(un[0:ny][0:nx], vn[0:ny][0:nx], b[0:ny][0:nx])
+#pragma acc data copy(u[0:ny][0:nx], v[0:ny][0:nx], p[0:ny][0:nx])
   for (; u_diff > eps; nt++) {
     #pragma acc parallel loop
     for (int i = 0; i < ny; i++) {
@@ -149,6 +154,7 @@ int cavity_flow(double eps, int nx, int ny, matrix u, matrix v, double dt,
     u_diff /= u_sum;
   }
 
+#pragma acc exit data delete(un, vn, b)
   return nt;
 }
 
@@ -166,7 +172,6 @@ int main() {
   matrix v = init_matrix(nx, ny);
   matrix p = init_matrix(nx, ny);
 
-  #pragma acc parallel loop
   for (int i = 0; i < ny; i++) {
     for (int j = 0; j < nx; j++) {
       u[i][j] = 0;
@@ -184,7 +189,6 @@ int main() {
   printf("Elapsed time: %lf s.\n", time);
 
   double u_sum = 0, v_sum = 0, p_sum = 0;
-  #pragma acc parallel loop reduction(+:u_sum, v_sum, p_sum)
   for (int i = 0; i < ny; i++) {
     for (int j = 0; j < nx; j++) {
       u_sum += abs(u[i][j]);
