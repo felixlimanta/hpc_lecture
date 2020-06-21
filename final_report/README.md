@@ -7,11 +7,15 @@
     - Results (`u`, `v`, `p`) are saved as `02_navier_stokes.out`.
     - `plot.py`: Plots Navier-Stokes calculation results
     - Exports figure as `fig_cpp.png` with `plot.py`.
-3. `03_cuda.cpp`: CUDA version of `02_navier_stokes.cpp`.
+3. `03_cuda.cpp`: CUDA parallelization of `02_navier_stokes.cpp`.
     - Drastic increase in speed.
     - Some CUDA functions cannot accept `double` variable types, thus variables are defined as `float`s. This produces slight differences in output.
     - Results (`u`, `v`, `p`) are saved as `03_cuda.out`.
     - Exports figure as `fig_cuda.png` with `plot.py`.
+4. `04_openmp.cpp`: OpenMP parallelization of `02_navier_stokes.cpp`.
+    - Noticeable increase in speed, though not to CUDA's extent.
+    - Results (`u`, `v`, `p`) are saved as `04_openmp.out`.
+    - Exports figure as `fig_openmp.png` with `plot.py`.
 
 Results on local machine, with Intel i5-7600, 8GB of RAM, and NVIDIA TITAN Xp, running Ubuntu 18.04
 
@@ -40,4 +44,11 @@ Sum(|v|)=129.107422
 Sum(|p|)=175.680099
 Figure exported as fig_cuda.png
 
+foo@bar:~$ g++ -fopenmp 04_openmp.cpp && ./a.out && python plot.py 04_openmp.out fig_openmp.png
+Steps: 6605
+Elapsed time: 7.830460 s.
+Sum(|u|)=219.635472
+Sum(|v|)=129.108059
+Sum(|p|)=175.680312
+Figure exported as fig_openmp.png
 ```
