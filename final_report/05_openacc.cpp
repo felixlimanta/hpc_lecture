@@ -9,10 +9,18 @@ using namespace std;
 
 const char *outf = "05_openacc.out";
 
-typedef vector<vector<double>> matrix;
+typedef double** matrix;
 
-void build_up_b(int nx, int ny, matrix &b, double rho, double dt, matrix &u,
-                matrix &v, double dx, double dy) {
+matrix init_matrix(int nx, int ny) {
+  matrix m = new double*[ny];
+  for (int i = 0; i < nx; i++) {
+    m[i] = new double[nx];
+  }
+  return m;
+}
+
+void build_up_b(int nx, int ny, matrix b, double rho, double dt, matrix u,
+                matrix v, double dx, double dy) {
 
 #pragma acc parallel loop
   for (int i = 1; i < ny - 1; i++) {
@@ -29,10 +37,10 @@ void build_up_b(int nx, int ny, matrix &b, double rho, double dt, matrix &u,
 }
 
 int nit = 50;
-void pressure_poisson(int nx, int ny, matrix &p, double dx, double dy,
-                      matrix &b) {
+void pressure_poisson(int nx, int ny, matrix p, double dx, double dy,
+                      matrix b) {
 
-  matrix pn(ny, vector<double>(nx));
+  matrix pn = init_matrix(nx, ny);
   for (int q = 0; q < nit; q++) {
 #pragma acc parallel loop
     for (int i = 0; i < ny; i++) {
@@ -51,13 +59,13 @@ void pressure_poisson(int nx, int ny, matrix &p, double dx, double dy,
       }
     }
 
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 0; i < ny; i++) {
       p[i][nx - 1] = p[i][nx - 2]; // dp/dx = 0 at x = 2
       p[i][0] = p[i][1];           // dp/dy = 0 at y = 0
     }
 
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 0; i < nx; i++) {
       p[0][i] = p[1][i]; // dp/dx = 0 at x = 0
       p[ny - 1][i] = 0;  // p = 0 at y = 2
@@ -65,17 +73,17 @@ void pressure_poisson(int nx, int ny, matrix &p, double dx, double dy,
   }
 }
 
-int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
-                double dx, double dy, matrix &p, double rho, double nu) {
+int cavity_flow(double eps, int nx, int ny, matrix u, matrix v, double dt,
+                double dx, double dy, matrix p, double rho, double nu) {
 
-  matrix un(ny, vector<double>(nx));
-  matrix vn(ny, vector<double>(nx));
-  matrix b(ny, vector<double>(nx));
+  matrix un = init_matrix(nx, ny);
+  matrix vn = init_matrix(nx, ny);
+  matrix b = init_matrix(nx, ny);
 
   int nt = 0;
   double u_diff = 1000;
   for (; u_diff > eps; nt++) {
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 0; i < ny; i++) {
       for (int j = 0; j < nx; j++) {
         un[i][j] = u[i][j];
@@ -86,7 +94,7 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
     build_up_b(nx, ny, b, rho, dt, u, v, dx, dy);
     pressure_poisson(nx, ny, p, dx, dy, b);
 
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 1; i < ny - 1; i++) {
       for (int j = 1; j < nx - 1; j++) {
         u[i][j] = un[i][j] - un[i][j] * dt / dx * (un[i][j] - un[i][j - 1]) -
@@ -99,7 +107,7 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
       }
     }
 
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 1; i < ny - 1; i++) {
       for (int j = 1; j < nx - 1; j++) {
         v[i][j] = vn[i][j] - un[i][j] * dt / dx * (vn[i][j] - vn[i][j - 1]) -
@@ -112,7 +120,7 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
       }
     }
 
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 0; i < ny; i++) {
       u[i][0] = 0;
       u[i][nx - 1] = 0;
@@ -120,7 +128,7 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
       v[i][nx - 1] = 0;
     }
 
-#pragma acc parallel loop
+    #pragma acc parallel loop
     for (int i = 0; i < nx; i++) {
       u[0][i] = 0;
       u[ny - 1][i] = 1; // set velocity on cavity lid equal to 1
@@ -131,7 +139,7 @@ int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
     // diff on u to check for convergence
     u_diff = 0;
     double u_sum = 0;
-#pragma acc parallel loop reduction(+ : u_diff, u_sum)
+    #pragma acc parallel loop reduction(+:u_diff, u_sum)
     for (int i = 0; i < ny; i++) {
       for (int j = 0; j < nx; j++) {
         u_diff += abs(u[i][j] - un[i][j]);
@@ -154,11 +162,11 @@ int main() {
   double nu = .1;
   double dt = .001;
 
-  matrix u(ny, vector<double>(nx));
-  matrix v(ny, vector<double>(nx));
-  matrix p(ny, vector<double>(nx));
+  matrix u = init_matrix(nx, ny);
+  matrix v = init_matrix(nx, ny);
+  matrix p = init_matrix(nx, ny);
 
-#pragma acc parallel loop
+  #pragma acc parallel loop
   for (int i = 0; i < ny; i++) {
     for (int j = 0; j < nx; j++) {
       u[i][j] = 0;
@@ -176,7 +184,7 @@ int main() {
   printf("Elapsed time: %lf s.\n", time);
 
   double u_sum = 0, v_sum = 0, p_sum = 0;
-#pragma acc parallel loop reduction(+ : u_sum, v_sum, p_sum)
+  #pragma acc parallel loop reduction(+:u_sum, v_sum, p_sum)
   for (int i = 0; i < ny; i++) {
     for (int j = 0; j < nx; j++) {
       u_sum += abs(u[i][j]);

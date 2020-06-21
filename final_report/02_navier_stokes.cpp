@@ -6,12 +6,20 @@
 
 using namespace std;
 
-const char* outf = "02_navier_stokes.out";
+const char *outf = "02_navier_stokes.out";
 
-typedef vector<vector<double>> matrix;
+typedef double **matrix;
 
-void build_up_b(int nx, int ny, matrix &b, double rho, double dt, matrix &u,
-                matrix &v, double dx, double dy) {
+matrix init_matrix(int nx, int ny) {
+  matrix m = new double *[ny];
+  for (int i = 0; i < nx; i++) {
+    m[i] = new double[nx];
+  }
+  return m;
+}
+
+void build_up_b(int nx, int ny, matrix b, double rho, double dt, matrix u,
+                matrix v, double dx, double dy) {
 
   for (int i = 1; i < ny - 1; i++) {
     for (int j = 1; j < nx - 1; j++) {
@@ -27,10 +35,10 @@ void build_up_b(int nx, int ny, matrix &b, double rho, double dt, matrix &u,
 }
 
 int nit = 50;
-void pressure_poisson(int nx, int ny, matrix &p, double dx, double dy,
-                      matrix &b) {
+void pressure_poisson(int nx, int ny, matrix p, double dx, double dy,
+                      matrix b) {
 
-  matrix pn(ny, vector<double>(nx));
+  matrix pn = init_matrix(nx, ny);
   for (int q = 0; q < nit; q++) {
     for (int i = 0; i < ny; i++) {
       for (int j = 0; j < nx; j++) {
@@ -57,12 +65,12 @@ void pressure_poisson(int nx, int ny, matrix &p, double dx, double dy,
   }
 }
 
-int cavity_flow(double eps, int nx, int ny, matrix &u, matrix &v, double dt,
-                double dx, double dy, matrix &p, double rho, double nu) {
+int cavity_flow(double eps, int nx, int ny, matrix u, matrix v, double dt,
+                double dx, double dy, matrix p, double rho, double nu) {
 
-  matrix un(ny, vector<double>(nx));
-  matrix vn(ny, vector<double>(nx));
-  matrix b(ny, vector<double>(nx));
+  matrix un = init_matrix(nx, ny);
+  matrix vn = init_matrix(nx, ny);
+  matrix b = init_matrix(nx, ny);
 
   int nt = 0;
   double u_diff = 1000;
@@ -140,9 +148,9 @@ int main() {
   double nu = .1;
   double dt = .001;
 
-  matrix u(ny, vector<double>(nx));
-  matrix v(ny, vector<double>(nx));
-  matrix p(ny, vector<double>(nx));
+  matrix u = init_matrix(nx, ny);
+  matrix v = init_matrix(nx, ny);
+  matrix p = init_matrix(nx, ny);
 
   for (int i = 0; i < ny; i++) {
     for (int j = 0; j < nx; j++) {

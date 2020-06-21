@@ -8,12 +8,10 @@
     - `plot.py`: Plots Navier-Stokes calculation results
     - Exports figure as `fig_cpp.png` with `plot.py`.
 3. `03_cuda.cpp`: CUDA parallelization of `02_navier_stokes.cpp`.
-    - Drastic increase in speed.
     - Some CUDA functions cannot accept `double` variable types, thus variables are defined as `float`s. This produces slight differences in output.
     - Results (`u`, `v`, `p`) are saved as `03_cuda.out`.
     - Exports figure as `fig_cuda.png` with `plot.py`.
 4. `04_openmp.cpp`: OpenMP parallelization of `02_navier_stokes.cpp`.
-    - Noticeable increase in speed, though not to CUDA's extent.
     - Results (`u`, `v`, `p`) are saved as `04_openmp.out`.
     - Exports figure as `fig_openmp.png` with `plot.py`.
 5. `05_openacc.cpp`: OpenACC version of `02_navier_stokes.cpp`, directly ported from `04_openmp.cpp`.
@@ -34,7 +32,7 @@ Figure exported as fig_python.png
 
 foo@bar:~$ g++ 02_navier_stokes.cpp && ./a.out && python plot.py 02_navier_stokes.out fig_cpp.png
 Steps: 6605
-Elapsed time: 18.985322 s.
+Elapsed time: 6.461589 s.
 Sum(|u|)=219.635472
 Sum(|v|)=129.108059
 Sum(|p|)=175.680312
@@ -50,7 +48,7 @@ Figure exported as fig_cuda.png
 
 foo@bar:~$ g++ -fopenmp 04_openmp.cpp && ./a.out && python plot.py 04_openmp.out fig_openmp.png
 Steps: 6605
-Elapsed time: 7.830460 s.
+Elapsed time: 3.524046 s.
 Sum(|u|)=219.635472
 Sum(|v|)=129.108059
 Sum(|p|)=175.680312
